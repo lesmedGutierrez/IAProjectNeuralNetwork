@@ -2,12 +2,12 @@ import pygame.font, pygame.event, pygame.draw
 from PIL import Image
 from Models import neural_network as neu_net
 import pickle as pck
-from os.path import abspath, exists
 import glob
 import tkMessageBox
 
 net = neu_net.NeuralNetwork()
 bkgnd_draw = pygame.Surface((350, 350))
+
 def Process_image(image):
     row = image.size[0]
     col = image.size[1]
@@ -15,6 +15,7 @@ def Process_image(image):
     to = ri = bo = le = 0
     flag = 0
     pixels = image.load()
+
     #/top edge/
 
     for x in range(row):
@@ -22,6 +23,7 @@ def Process_image(image):
             r = pixels[x, y][0]
             g = pixels[x, y][1]
             b = pixels[x, y][2]
+            #Si hay un negro
             if(((r+g+b)/3)<=200):
                 flag = 1
                 to = x
@@ -188,14 +190,10 @@ def main(load_img,image):
                     pygame.draw.circle(bkgnd_draw, drawColor, lineStart, lineWidth, 0)
                 if pygame.mouse.get_pressed() == (0, 0, 1):
                     pygame.draw.circle(bkgnd_draw, (255, 255, 255), lineStart, lineWidth, 0)
-
                 lineStart = lineEnd
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-
                     predict_image(bkgnd_draw, net)
-
-
                 if event.key == pygame.K_c:
                     bkgnd_draw = pygame.Surface((350, 350))
                     bkgnd_draw.fill((255, 255, 255))
@@ -217,11 +215,9 @@ def main(load_img,image):
                     read_5x5_images()
         screen.blit(bkgnd_draw, (0, 0))
         pygame.display.flip()
-        #return pygame
 
 
 def crop_resize(net):
-    #print "Plis w8 loading images"
     all_images =[]
     for x in range(1, 37):
         list_images =[]
@@ -234,12 +230,10 @@ def crop_resize(net):
             img = Process_image(img)
             list_images.append(img)
         all_images.append(list_images[:])
-    #print "All images: " + str(all_images)
     save_list(all_images, "Images\.imgs5x5")
-    #print "Loading images complete"
 
 
-
+#Trains.
 
 def read_5x5_images():
     path = "E:\Users\Lesmed\Pictures\Training set 5x5"
@@ -249,7 +243,7 @@ def read_5x5_images():
         img = Image.open(file.title())
         pixels = img.load()
         list = []
-        for i in range(img.size[0]):    # for every pixel:
+        for i in range(img.size[0]):
             for j in range(img.size[1]):
                 r = pixels[j, i][0]
                 g = pixels[j, i][1]
@@ -277,10 +271,11 @@ def read_list(infile):
     return item_list
 
 def predict_image(bkgnd_draw, net):
-    data = pygame.image.tostring(bkgnd_draw, 'RGB')
-    print "DAta :" , data
-    img = Image.fromstring('RGB', (350, 350), data)
+    imageData = pygame.image.tostring(bkgnd_draw, 'RGB')
+    print "Data :" , imageData
+    img = Image.fromstring('RGB', (350, 350), imageData)
     list = Process_image(img)
+    print list
     net.feed_forward(list, False)
     try:
         view_initialization()
