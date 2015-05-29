@@ -38,7 +38,6 @@ class NeuralNetwork():
 
         return self.results[index], greater
 
-    #  Jonathan: Made some changes, somethings weren't necessary.
     def variable_initialization(self):
         for x in range(0, self.hidden_layer_neurons):
             self.W1.append(np.random.randn(1, self.inputs_layer_neurons)[0])
@@ -52,14 +51,11 @@ class NeuralNetwork():
     def feed_forward(self, input, Tphase):
         self.hidden_layer = []
         self.output_layer = []
-        #print "len inputs x : ", (self.hidden_layer_neurons)
         for x in range(0, self.hidden_layer_neurons):
             hidden_input = 0
-            #print "len inputs y : ", len(input)
             for y in range(0, len(input)):
                 hidden_input += self.W1[x][y] * input[y]
             self.hidden_layer.append(self.sigmoid(hidden_input))
-        #    output layer
         for x in range(0, self.output_layer_neurons):
             output_layer_input = 0
             for y in range(0, self.hidden_layer_neurons):
@@ -73,7 +69,6 @@ class NeuralNetwork():
             print "Letra: ", r, " porcentaje: ", p
 
 
-#  BackPropagation, IT WORKS, I guess
     def back_propagation(self):
         nw2 = self.W2[:]
         for i, output in enumerate(self.output_layer):
