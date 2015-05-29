@@ -37,7 +37,9 @@ def Process_image(image):
 
 def define_box(pixels,row, col):
     to = ri = bo = le = 0
+    to = le = 1000000
     flag = 0
+    #top edge
     for x in range(row):
         for y in range(col):
             r = pixels[x, y][0]
@@ -45,55 +47,18 @@ def define_box(pixels,row, col):
             b = pixels[x, y][2]
             #Si hay un negro
             if(((r+g+b)/3)<=200):
-                flag = 1
-                to = x
-                break
-        if(flag==1):
-            flag = 0
-            break
-    #/bottom edge/
 
-    for x in range(row-1, 0, -1):
-        for y in range(col):
-            r = pixels[x, y][0]
-            g = pixels[x, y][1]
-            b = pixels[x, y][2]
-            if(((r+g+b)/3)<=200):
-                flag = 1
-                bo = x
+                if x<to:
+                    to = x
+                if x>=bo:
+                    bo = x
+                if y<le:
+                    le = y
+                if y>=ri:
+                    ri = y
                 break
-        if(flag==1):
-            flag = 0
-            break
-    #/left edge/
-
-    for y in range(col):
-        for x in range(row):
-            r = pixels[x, y][0]
-            g = pixels[x, y][1]
-            b = pixels[x, y][2]
-            if(((r+g+b)/3)<=200):
-                flag = 1
-                le = y
-                break
-        if(flag==1):
-            flag = 0
-            break
-
-    #/right edge/
-    for y in range(col-1, 0, -1):
-        for x in range(row):
-            r = pixels[x, y][0]
-            g = pixels[x, y][1]
-            b = pixels[x, y][2]
-            if(((r+g+b)/3)<=200):
-                flag = 1
-                ri = y
-                break
-        if(flag==1):
-            flag = 0
-            break
     box = (to, le, bo, ri)
+    print box
     return box
 
 
@@ -278,10 +243,10 @@ def read_list(infile):
 
 def predict_image(bkgnd_draw, net):
     imageData = pygame.image.tostring(bkgnd_draw, 'RGB')
-    print "Data :" , imageData
+    #print "Data :" , imageData
     img = Image.fromstring('RGB', (350, 350), imageData)
     list = Process_image(img)
-    print list
+    #print list
     net.feed_forward(list, False)
     try:
         view_initialization()
