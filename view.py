@@ -12,7 +12,39 @@ def Process_image(image):
     row = image.size[0]
     col = image.size[1]
 
+
+
     pixels = image.load()
+    new_col = 10000000
+    new_col2 = -1
+    list_ima =[]
+    first_column =False
+    white_column= True
+
+    for x in range(col):
+        white_column = True
+        for y in range(row):
+            r = pixels[y, x][0]
+            g = pixels[y, x][1]
+            b = pixels[y, x][2]
+            #Si hay un negro
+            if(((r+g+b)/3)<=200)&(first_column == False):
+                print "hola", x ,y
+                new_col = x
+                first_column = True
+            if(((r+g+b)/3)<=200)&(white_column == True):
+                print "hola", x ,y
+                white_column = False
+                break
+        if (white_column == True)&(first_column == True):
+            list_ima.append([new_col, x])
+            first_column = False
+
+
+
+
+    print list_ima
+
 
     box = define_box(pixels,row, col)
 
