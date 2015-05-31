@@ -4,6 +4,7 @@ from Models import neural_network as neu_net
 import pickle as pck
 import glob
 import tkMessageBox
+import copy
 
 net = neu_net.NeuralNetwork()
 bkgnd_draw = pygame.Surface((350, 350))
@@ -15,65 +16,77 @@ def Process_image(image):
 
 
     pixels = image.load()
-    new_col = 10000000
+    new_col = 0
     new_col2 = -1
     list_ima =[]
     first_column =False
     white_column= True
 
+    print col, row
+
     for x in range(col):
         white_column = True
         for y in range(row):
-            r = pixels[y, x][0]
-            g = pixels[y, x][1]
-            b = pixels[y, x][2]
+            r = pixels[x, y][0]
+            g = pixels[x, y][1]
+            b = pixels[x, y][2]
             #Si hay un negro
-            if(((r+g+b)/3)<=200)&(first_column == False):
-                print "hola", x ,y
-                new_col = x
-                first_column = True
-            if(((r+g+b)/3)<=200)&(white_column == True):
-                print "hola", x ,y
+            if(((r+g+b)/3)<=200):
                 white_column = False
-                break
-        if (white_column == True)&(first_column == True):
-            list_ima.append([new_col, x])
-            first_column = False
-
-
+                if (first_column == False):
+                    first_column = True
+                    new_col  = x
+                    break
+                else:
+                    break
+        if (white_column == True):
+            if (first_column == True):
+                list_ima.append([new_col, x])
+                first_column = False
 
 
     print list_ima
+    list_box =[]
+    for x in list_ima:
+        begin_col = x[0]
+        end_col = x[1]
+        pixels = image.load()
+
+        box = define_box(pixels,row, col,begin_col, end_col)
 
 
-    box = define_box(pixels,row, col)
+        img = image.crop(box)
+        img = img.resize((5, 5), Image.ANTIALIAS)
+        pixels = img.load()
 
-    img = image.crop(box)
-    img = img.resize((5, 5), Image.ANTIALIAS)
-    pixels = img.load()
-    list = []
-    for i in range(img.size[0]):
-        for j in range(img.size[1]):
-            r = pixels[j, i][0]
-            g = pixels[j, i][1]
-            b = pixels[j, i][2]
-            if(((r+g+b)/3)>200):
-                list.append(1)
-                pixels[j,i] = (255,255,255)
-            elif(((r+g+b)/3)<=200):
-                list.append(0)
-                pixels[j,i] = (0,0,0)
+        list = []
+        for i in range(img.size[0]):
+            for j in range(img.size[1]):
+                r = pixels[j, i][0]
+                g = pixels[j, i][1]
+                b = pixels[j, i][2]
+                if(((r+g+b)/3)>200):
+                    list.append(1)
+                    pixels[j,i] = (255,255,255)
+                elif(((r+g+b)/3)<=200):
+                    list.append(0)
+                    pixels[j,i] = (0,0,0)
+        list_box.append(list)
+        img.save("image.png", 'PNG')
+    return list_box
 
-    img.save("image.png", 'PNG')
-    return list
-
-def define_box(pixels,row, col):
+def define_box(pixels,row, col, begin_col, end_col):
     to = ri = bo = le = 0
     to = le = 1000000
     flag = 0
     #top edge
+    print "begin end",begin_col, end_col
     for x in range(row):
+
         for y in range(col):
+            if (x< begin_col)or(x>=  end_col):
+                break
+            #print  "out of range " , x, y
             r = pixels[x, y][0]
             g = pixels[x, y][1]
             b = pixels[x, y][2]
@@ -117,7 +130,7 @@ def view_initialization():
     keepGoing = True
     lineStart = (0, 0)
     drawColor = (30, 50, 90)
-    lineWidth = 22
+    lineWidth = 10
     pygame.display.update()
 
 
@@ -279,7 +292,8 @@ def predict_image(bkgnd_draw, net):
     img = Image.fromstring('RGB', (350, 350), imageData)
     list = Process_image(img)
     #print list
-    net.feed_forward(list, False)
+    for letter in list:
+        net.feed_forward(letter, False)
     try:
         view_initialization()
     except:
