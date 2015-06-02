@@ -56,7 +56,10 @@ def Process_image(image):
 
 
         img = image.crop(box)
+
+        img.save("image1"+ str(begin_col) + ".png", "PNG")
         img = img.resize((5, 5), Image.ANTIALIAS)
+
         pixels = img.load()
 
         list = []
@@ -84,7 +87,7 @@ def define_box(pixels,row, col, begin_col, end_col):
     for x in range(row):
 
         for y in range(col):
-            if (x< begin_col)or(x>=  end_col):
+            if (y>=  end_col):
                 break
             #print  "out of range " , x, y
             r = pixels[x, y][0]
@@ -92,7 +95,6 @@ def define_box(pixels,row, col, begin_col, end_col):
             b = pixels[x, y][2]
             #Si hay un negro
             if(((r+g+b)/3)<=200):
-
                 if x<to:
                     to = x
                 if x>=bo:
@@ -102,7 +104,7 @@ def define_box(pixels,row, col, begin_col, end_col):
                 if y>=ri:
                     ri = y
                 break
-    box = (to, le, bo, ri)
+    box = (begin_col, to, end_col, bo)
     print box
     return box
 
@@ -210,6 +212,7 @@ def main(load_img,image):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     predict_image(bkgnd_draw, net)
+
                 if event.key == pygame.K_c:
                     bkgnd_draw = pygame.Surface((350, 350))
                     bkgnd_draw.fill((255, 255, 255))
@@ -255,6 +258,7 @@ def read_5x5_images():
     path = "E:\Users\Lesmed\Pictures\Training set 5x5"
     files = glob.glob(path+"\*.png")
     list_images = []
+
     for file in files:
         img = Image.open(file.title())
         pixels = img.load()
@@ -270,7 +274,7 @@ def read_5x5_images():
                 elif(((r+g+b)/3)<=200):
                     list.append(0)
                     pixels[j,i] = (0,0,0)
-        img.save("image.png", 'PNG')
+        img.save("image.png" + src(cont), 'PNG')
         list_images.append([list])
     save_list(list_images, "Images\.imgs5x5")
 
@@ -291,8 +295,10 @@ def predict_image(bkgnd_draw, net):
     #print "Data :" , imageData
     img = Image.fromstring('RGB', (350, 350), imageData)
     list = Process_image(img)
+    img.save("image.png", 'PNG')
     #print list
     for letter in list:
+
         net.feed_forward(letter, False)
     try:
         view_initialization()
